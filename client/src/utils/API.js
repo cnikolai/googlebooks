@@ -6,7 +6,7 @@ export default {
     return axios.get("/api/books");
   },
   // Gets the book with the given id
-  getBook: function(id) {
+  viewBook: function(id) {
     return axios.get("/api/books/" + id);
   },
   // Deletes the book with the given id
@@ -16,5 +16,8 @@ export default {
   // Saves a book to the database
   saveBook: function(bookData) {
     return axios.post("/api/books", bookData);
+  },
+  getGoogleBooks: function(term) {
+    return axios.get("https://www.googleapis.com/books/v1/volumes?q=" + term);
   }
 };

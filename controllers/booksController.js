@@ -5,7 +5,7 @@ module.exports = {
   findAll: function(req, res) {
     db.Book
       .find(req.query)
-      .sort({ date: -1 })
+      .sort({ title: 1 })
       .then(dbModel => res.json(dbModel))
       .catch(err => res.status(422).json(err));
   },
@@ -19,7 +19,7 @@ module.exports = {
     db.Book
       .create(req.body)
       .then(dbModel => res.json(dbModel))
-      .catch(err => res.status(422).json(err));
+      .catch(err => res.status(433).json(err));
   },
   update: function(req, res) {
     db.Book
@@ -28,10 +28,11 @@ module.exports = {
       .catch(err => res.status(422).json(err));
   },
   remove: function(req, res) {
+    //console.log("id: ", req.params.id);
     db.Book
       .findById({ _id: req.params.id })
       .then(dbModel => dbModel.remove())
       .then(dbModel => res.json(dbModel))
-      .catch(err => res.status(422).json(err));
+      .catch(err => res.status(444).json(err));
   }
 };

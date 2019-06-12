@@ -3,16 +3,16 @@ import DeleteBtn from "../components/DeleteBtn";
 import Jumbotron from "../components/Jumbotron";
 import API from "../utils/API";
 import { Link } from "react-router-dom";
-import { Col, Row, Container } from "../components/Grid";
+//import { Col, Row, Container } from "../components/Grid";
 import { List, ListItem } from "../components/List";
 import { Input, TextArea, FormBtn } from "../components/Form";
+import "./style.css";
+
 
 class Books extends Component {
   state = {
     books: [],
-    title: "",
-    author: "",
-    synopsis: ""
+    title: ""
   };
 
   componentDidMount() {
@@ -21,9 +21,11 @@ class Books extends Component {
 
   loadBooks = () => {
     API.getBooks()
-      .then(res =>
-        this.setState({ books: res.data, title: "", author: "", synopsis: "" })
-      )
+      .then(res => {
+        //console.log("res in load books: ",res.data);
+        this.setState({ books: res.data, title: ""})
+        //console.log("books in load books: ", this.state.books);
+      })
       .catch(err => console.log(err));
   };
 
@@ -42,75 +44,92 @@ class Books extends Component {
 
   handleFormSubmit = event => {
     event.preventDefault();
-    if (this.state.title && this.state.author) {
-      API.saveBook({
-        title: this.state.title,
-        author: this.state.author,
-        synopsis: this.state.synopsis
+    if (this.state.title) {
+      API.getGoogleBooks(this.state.title)
+      .then(res => {
+        console.log("response in getgooglebooks: ",res.data.items);
+        console.log("response length: ", res.data.items.length);
+        for (var i=0; i < res.data.items.length; i++) {
+          var title = res.data.items[i].volumeInfo.title;
+          //console.log("title: ", title);
+          var authors = res.data.items[i].volumeInfo.authors;
+          //console.log("authors: ", authors);
+          var description = res.data.items[i].volumeInfo.description;
+          //console.log("description: ", description);
+          var image = res.data.items[i].volumeInfo.imageLinks.smallThumbnail;
+          //console.log("image: ",image);
+          var link = res.data.items[i].volumeInfo.canonicalVolumeLink;
+          //console.log("link: ",link);
+          API.saveBook({
+            title: title,
+            authors: authors,
+            description: description,
+            image: image,
+            link: link
+          })
+          //.then(res2 => this.loadBooks())
+          //.catch(err => console.log(err));
+        }
+        //console.log("res in getgooglebooks: ",res.data.items);
+        this.setState({ books: res.data.items, title: ""})
+        //console.log("books in getgooglebooks: ", this.state.books);
+        this.loadBooks();
       })
-        .then(res => this.loadBooks())
-        .catch(err => console.log(err));
+      .catch(err => console.log(err));
     }
   };
 
   render() {
     return (
-      <Container fluid>
-        <Row>
-          <Col size="md-6">
-            <Jumbotron>
-              <h1>What Books Should I Read?</h1>
-            </Jumbotron>
+      <div>
             <form>
               <Input
                 value={this.state.title}
                 onChange={this.handleInputChange}
                 name="title"
-                placeholder="Title (required)"
-              />
-              <Input
-                value={this.state.author}
-                onChange={this.handleInputChange}
-                name="author"
-                placeholder="Author (required)"
-              />
-              <TextArea
-                value={this.state.synopsis}
-                onChange={this.handleInputChange}
-                name="synopsis"
-                placeholder="Synopsis (Optional)"
+                placeholder="Search Term (required)"
               />
               <FormBtn
-                disabled={!(this.state.author && this.state.title)}
+                disabled={!this.state.title}
                 onClick={this.handleFormSubmit}
               >
-                Submit Book
+                Search for Book(s)
               </FormBtn>
             </form>
-          </Col>
-          <Col size="md-6 sm-12">
             <Jumbotron>
               <h1>Books On My List</h1>
             </Jumbotron>
             {this.state.books.length ? (
+              <div>
+                <p>Results</p>
               <List>
                 {this.state.books.map(book => (
                   <ListItem key={book._id}>
                     <Link to={"/books/" + book._id}>
-                      <strong>
-                        {book.title} by {book.author}
-                      </strong>
+                      <div>
+                      <strong>{book.title}                      </strong>
+                      </div>
                     </Link>
+                    <br></br>
+                    <div>
+                      Written by: {book.authors.join(", ")}
+                      <div>
+                        <br></br>
+                        <div className="image"><img alt={book.title} src={book.image}></img></div>
+                        <div className="right">{book.description}</div>
+                      </div>
+                    </div>
+                    <br></br>
+                      <div><a className="right2" href={book.link}>{book.link}</a></div>
                     <DeleteBtn onClick={() => this.deleteBook(book._id)} />
                   </ListItem>
                 ))}
               </List>
+              </div>
             ) : (
               <h3>No Results to Display</h3>
             )}
-          </Col>
-        </Row>
-      </Container>
+      </div>
     );
   }
 }
