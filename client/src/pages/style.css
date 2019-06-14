@@ -8,5 +8,13 @@
 
 .right2 {
     margin-left: 20px;
-    float: right
+    float: right;
+}
+
+.right3 {
+    margin-left: 20px;
+}
+
+form, h3, p {
+    padding: 20px;
 }

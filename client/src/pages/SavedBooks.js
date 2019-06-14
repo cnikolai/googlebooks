@@ -92,7 +92,6 @@ class SavedBooks extends Component {
             </Jumbotron>
             {this.state.books.length ? (
               <div>
-                <p>Results</p>
               <List>
                 {this.state.books.map(book => (
                   <ListItem key={book._id}>
@@ -113,7 +112,7 @@ class SavedBooks extends Component {
                       <a href={book.link}>{book.link}</a>
                     </div>
                     <div>
-                      <button className="right2"><Link to={"/saved/" + book.title}>View</Link></button>
+                      <button className="right2"><Link to={"/saved/" + book.title} style={{ color: '#000' }}>View</Link></button>
                       <DeleteBtn onClick={() => this.deleteBook(book._id)} />
                       {/* <ViewBtn onClick={() => this.viewBook(book._id)} />
                       <SaveBtn onClick={() => this.saveBook(book._id)} /> */}

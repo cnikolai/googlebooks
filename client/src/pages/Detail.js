@@ -77,7 +77,7 @@ class Detail extends Component {
               <p>
                 {this.state.book.description}
               </p>
-              <div><a className="right2" href={this.state.book.link}>{this.state.book.link}</a></div>
+              <div><a className="right3" href={this.state.book.link}>{this.state.book.link}</a></div>
             </article>
           </Col>
         </Row>

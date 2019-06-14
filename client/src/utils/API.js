@@ -18,6 +18,6 @@ export default {
     return axios.post("/api/books", bookData);
   },
   getGoogleBooks: function(term) {
-    return axios.get("https://www.googleapis.com/books/v1/volumes?q=" + term);
+    return axios.get("https://www.googleapis.com/books/v1/volumes?q=" + term + "&maxResults=25");
   }
 };

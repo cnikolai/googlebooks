@@ -178,7 +178,7 @@ class Books extends Component {
             </form>
             {this.state.books.length ? (
               <div>
-                <p>Results</p>
+                <p><strong>Results</strong></p>
               <List>
                 {this.state.books.map(book => (
                   <ListItem key={book.id}>
@@ -197,10 +197,10 @@ class Books extends Component {
                       </div>
                     </div>
                     <br></br>
-                      <div><a className="right2" href={book.link}>{book.link}</a></div>
+                      <div><a className="right3" href={book.link}>{book.link}</a></div>
                     {/* <DeleteBtn onClick={() => this.deleteBook(book._id)} /> */}
-                    <button><Link to={"/books/" + book.searchkeyword + "/" + book.id}>View</Link></button>
-                    <SaveBtn onClick={() => this.saveBook({title: book.title, authors: book.authors, description: book.description, image: book.image, link: book.link})}></SaveBtn>
+                    <button className="right2"><Link style={{ color: '#000000' }} to={"/books/" + book.searchkeyword + "/" + book.id}>View</Link></button>
+                    <SaveBtn className="right2" onClick={() => this.saveBook({title: book.title, authors: book.authors, description: book.description, image: book.image, link: book.link})}></SaveBtn>
                   </ListItem>
                 ))}
               </List>
