@@ -2,9 +2,10 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Col, Row, Container } from "../components/Grid";
 import Jumbotron from "../components/Jumbotron";
-import API from "../utils/API";
+//import API from "../utils/API";
+import savedAPI from "../utils/savedAPI";
 
-class Detail extends Component {
+class SavedBooksDetail extends Component {
   state = {
     book: {}
   };
@@ -18,7 +19,7 @@ class Detail extends Component {
     //     console.log("authors: ", res.data.authors.join(", "));
     //   })
     //   .catch(err => console.log(err));
-    API.getGoogleBooks(this.props.match.params.id)
+    savedAPI.getGoogleBooks(this.props.match.params.id)
     .then(res => {
         console.log("response in getgooglebooks: ",res.data.items);
         console.log("response length: ", res.data.items.length);
@@ -38,7 +39,6 @@ class Detail extends Component {
             description: description,
             image: image,
             link: link,
-            searchkeyword: this.props.match.params.searchkeyword
           };
           //this.state.book.push(newBook);
           this.setState({book: newBook});
@@ -84,7 +84,7 @@ class Detail extends Component {
         <Row>
           <Col size="md-6">
             <br></br>
-            <Link to={"/books/" + this.state.book.searchkeyword}>← Back to Homepage</Link>
+            <Link to={"/saved"}>← Back to Saved Books</Link>
           </Col>
         </Row>
       </Container>
@@ -92,4 +92,4 @@ class Detail extends Component {
   }
 }
 
-export default Detail;
+export default SavedBooksDetail;

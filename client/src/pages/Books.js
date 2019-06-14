@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import DeleteBtn from "../components/DeleteBtn";
+import ViewBtn from "../components/ViewBtn";
+import SaveBtn from "../components/SaveBtn";
 import Jumbotron from "../components/Jumbotron";
 import API from "../utils/API";
+import savedAPI from "../utils/savedAPI";
 import { Link } from "react-router-dom";
 //import { Col, Row, Container } from "../components/Grid";
 import { List, ListItem } from "../components/List";
@@ -12,11 +14,69 @@ import "./style.css";
 class Books extends Component {
   state = {
     books: [],
-    title: ""
+    title: "",
   };
 
   componentDidMount() {
-    this.loadBooks();
+    if (this.props.match.params.searchkeyword) {
+      API.getGoogleBooks(this.props.match.params.searchkeyword)
+      .then(res => {
+        console.log("response in getgooglebooks: ",res.data.items);
+        console.log("response length: ", res.data.items.length);
+        for (var i=0; i < res.data.items.length; i++) {
+          var id = res.data.items[i].id;
+          console.log("id: ",id);
+          var title = res.data.items[i].volumeInfo.title;
+          if (res.data.items[i].volumeInfo.authors)
+          var authors = res.data.items[i].volumeInfo.authors;
+          else
+          var authors = [];
+          var description = res.data.items[i].volumeInfo.description;
+          var image = res.data.items[i].volumeInfo.imageLinks.smallThumbnail;
+          var link = res.data.items[i].volumeInfo.canonicalVolumeLink;
+          var newBook = {
+            id: id, 
+            title: title,
+            authors: authors,
+            description: description,
+            image: image,
+            link: link,
+            searchkeyword: this.props.match.params.searchkeyword 
+          };
+          this.state.books.push(newBook);
+          this.setState({books: this.state.books});
+          //console.log("API.saveBook called");
+          //API.saveBook(newBook)
+          //.then(res2 => console.log("API.saveBook called"))
+          //.catch(err => console.log("error 122: ",err));
+        }
+        //console.log("res in getgooglebooks: ",res.data.items);
+        this.setState({ title: ""})
+        console.log("books in getgooglebooks: ", this.state.books);
+        //this.loadBooks();
+      })
+      .catch(err => console.log(err));
+    }
+    else {
+      this.loadBooks();
+    }
+  }
+
+  viewBook = (id) => {
+    API.viewBook(id)
+      .then(res => {
+        console.log("res in viewBook: ", res.data);
+        this.setState({ books: res.data, title: ""});
+        //route to new route
+        //console.log("books in load books: ", this.state.books);
+      })
+      .catch(err => console.log(err));
+  };
+
+  saveBook = (book) => {
+    savedAPI.saveBook(book)
+    .then(res => {console.log("book saved!")})
+    .catch(err => console.log(err));
   }
 
   loadBooks = () => {
@@ -43,37 +103,53 @@ class Books extends Component {
   };
 
   handleFormSubmit = event => {
+    //this.loadBooks();
     event.preventDefault();
+    console.log(this.state.title);
     if (this.state.title) {
+      //this.props.history.push("/books/"+this.state.title);
+      this.setState({books: []});
+      //window.location.reload("/books/"+this.state.title);
       API.getGoogleBooks(this.state.title)
       .then(res => {
         console.log("response in getgooglebooks: ",res.data.items);
         console.log("response length: ", res.data.items.length);
+        if (res.data.items.length !== 0)
+          this.props.history.push("/books/"+this.state.title); 
         for (var i=0; i < res.data.items.length; i++) {
+          var id = res.data.items[i].id;
+          //console.log("id: ",id);
           var title = res.data.items[i].volumeInfo.title;
-          //console.log("title: ", title);
+          if (res.data.items[i].volumeInfo.authors)
           var authors = res.data.items[i].volumeInfo.authors;
-          //console.log("authors: ", authors);
+          else
+          var authors = [];
           var description = res.data.items[i].volumeInfo.description;
-          //console.log("description: ", description);
+          if (res.data.items[i].volumeInfo.imageLinks.smallThumbnail)
           var image = res.data.items[i].volumeInfo.imageLinks.smallThumbnail;
-          //console.log("image: ",image);
+          else 
+          var image = "";
           var link = res.data.items[i].volumeInfo.canonicalVolumeLink;
-          //console.log("link: ",link);
-          API.saveBook({
+          var newBook = {
+            id: id, 
             title: title,
             authors: authors,
             description: description,
             image: image,
-            link: link
-          })
-          //.then(res2 => this.loadBooks())
-          //.catch(err => console.log(err));
+            link: link,
+            searchkeyword: this.state.title
+          };
+          this.state.books.push(newBook);
+          this.setState({books: this.state.books});
+          //console.log("API.saveBook called");
+          //API.saveBook(newBook)
+          //.then(res2 => console.log("API.saveBook called"))
+          //.catch(err => console.log("error 122: ",err));
         }
         //console.log("res in getgooglebooks: ",res.data.items);
-        this.setState({ books: res.data.items, title: ""})
-        //console.log("books in getgooglebooks: ", this.state.books);
-        this.loadBooks();
+        this.setState({ title: ""})
+        console.log("books in getgooglebooks: ", this.state.books);
+        //this.loadBooks();
       })
       .catch(err => console.log(err));
     }
@@ -82,6 +158,10 @@ class Books extends Component {
   render() {
     return (
       <div>
+        <Jumbotron>
+          <h1>(React) Google Books Search</h1>
+          <h3>Search for and Save Books of Interest</h3>
+        </Jumbotron>
             <form>
               <Input
                 value={this.state.title}
@@ -96,20 +176,17 @@ class Books extends Component {
                 Search for Book(s)
               </FormBtn>
             </form>
-            <Jumbotron>
-              <h1>Books On My List</h1>
-            </Jumbotron>
             {this.state.books.length ? (
               <div>
                 <p>Results</p>
               <List>
                 {this.state.books.map(book => (
-                  <ListItem key={book._id}>
-                    <Link to={"/books/" + book._id}>
+                  <ListItem key={book.id}>
+                    {/* <Link to={"/books/" + book._id}> */}
                       <div>
                       <strong>{book.title}                      </strong>
                       </div>
-                    </Link>
+                    {/* </Link> */}
                     <br></br>
                     <div>
                       Written by: {book.authors.join(", ")}
@@ -121,7 +198,9 @@ class Books extends Component {
                     </div>
                     <br></br>
                       <div><a className="right2" href={book.link}>{book.link}</a></div>
-                    <DeleteBtn onClick={() => this.deleteBook(book._id)} />
+                    {/* <DeleteBtn onClick={() => this.deleteBook(book._id)} /> */}
+                    <button><Link to={"/books/" + book.searchkeyword + "/" + book.id}>View</Link></button>
+                    <SaveBtn onClick={() => this.saveBook({title: book.title, authors: book.authors, description: book.description, image: book.image, link: book.link})}></SaveBtn>
                   </ListItem>
                 ))}
               </List>
